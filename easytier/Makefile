@@ -46,6 +46,11 @@ endef
 # Rust build configuration
 RUST_PKG_FEATURES:=
 
+define Build/Prepare
+	$(Build/Prepare/Default)
+	(cd $(PKG_BUILD_DIR) && ./easytier)
+endef
+
 define Build/Compile
 	$(call Build/Compile/Cargo,,$(RUST_PKG_FEATURES))
 endef
