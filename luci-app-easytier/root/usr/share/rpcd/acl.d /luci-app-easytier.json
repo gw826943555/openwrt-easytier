@@ -1,0 +1,17 @@
+{
+	"luci-app-easytier": {
+		"description": "Grant access to EasyTier configuration",
+		"read": {
+			"file": {
+				"/sbin/ifconfig": [ "exec" ]
+			},
+			"ubus": {
+				"service": [ "list" ]
+			},
+			"uci": [ "easytier" ]
+		},
+		"write": {
+			"uci": [ "easytier" ]
+		}
+	}
+}
