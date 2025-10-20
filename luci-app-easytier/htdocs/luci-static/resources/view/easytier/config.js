@@ -45,7 +45,7 @@ return view.extend({
 		let m, s, o;
 
 		m = new form.Map('easytier', _('EasyTier'),
-			_('EasyTier is an open source, cross-platform and easy to use virtual LAN.'));
+			_('A simple, secure, decentralized networking solution.'));
 
 		s = m.section(form.TypedSection);
 		s.anonymous = true;
@@ -65,6 +65,19 @@ return view.extend({
 		s = m.section(form.NamedSection, 'global', 'easytier', _('Global configuration'));
 
 		o = s.option(form.Flag, 'enabled', _('Enable'));
+
+		o = s.option(form.Flag, 'console', _('Web Console'),
+			_('Using the <a target="_blank" href="%s">Web Console</a> to manage EasyTier nodes.').format(
+				'https://easytier.cn/en/guide/network/web-console.html'));
+
+		o = s.option(form.Value, 'server', _('Configuration server address'),
+			_('Full url like udp://127.0.0.1:22020/admin or username only to use official server'));
+		o.depends('console', '1');
+		o.optional = false;
+
+		o = s.option(form.Value, 'machine', _('Machine ID'),
+			_('Leave empty to obtain machine ID from system'));
+		o.depends('console', '1');
 
 		o = s.option(form.Value, 'port', _('Listen port'));
 		o.datatype = 'port';
