@@ -74,97 +74,47 @@ return view.extend({
 			_('Full url like udp://127.0.0.1:22020/admin or username only to use official server'));
 		o.depends('console', '1');
 		o.optional = false;
+		o.rmempty = false;
 
 		o = s.option(form.Value, 'machine', _('Machine ID'),
 			_('Leave empty to obtain machine ID from system'));
 		o.depends('console', '1');
 
-		o = s.option(form.Value, 'port', _('Listen port'));
-		o.datatype = 'port';
+		o = s.option(form.Value, 'network', _('Network name'),
+			_('Used to identify this VPN network'));
+		o.depends('console', '0');
+		o.optional = false;
+		o.rmempty = false;
 
-		o = s.option(form.Value, 'secret', _('Client secret'));
+		o = s.option(form.Value, 'secret', _('Network secret'),
+			_('Used to verify that this node belongs to the VPN network'));
+		o.depends('console', '0');
 		o.password = true;
 
-		o = s.option(form.Value, 'local_conf_path', _('Local config path'),
-			_('Path of the optional file local.conf (see <a target="_blank" href="%s">documentation</a>).').format(
-				'https://docs.easytier.com/config/#local-configuration-options'));
-		o.value('/etc/easytier.conf');
+		o = s.option(form.Flag, 'dhcp', _('DHCP'),
+			_('Automatically assign virtual IP, default allocation is 10.126.126.0/24 network segment.'));
+		o.depends('console', '0');
 
-		o = s.option(form.Value, 'config_path', _('Config path'),
-				_('Persistent configuration directory (to keep other configurations such as controller or moons, etc.).'));
-		o.value('/etc/easytier');
+		o = s.option(form.Value, 'ipv4', _('IPv4 address'),
+			_('IPv4 network segment of this network.'));
+		o.depends('console', '0');
+		o.datatype = 'ip4addr';
+		o.placeholder = '10.126.126.0/24';
 
-		o = s.option(form.Flag, 'copy_config_path', _('Copy config path'),
-				_('Copy the contents of the persistent configuration directory to memory instead of linking it, this avoids writing to flash.'));
-		o.depends({'config_path': '', '!reverse': true});
+		o = s.option(form.DynamicList, 'peers', _('Peer nodes'),
+				_('When you don\'t have a public IP, you can use the free shared nodes provided by the EasyTier community for quick networking.'));
+		o.depends('console', '0');
+		o.value = 'tcp://public.easytier.cn:11010'
+		o.placeholder = 'tcp://example.cn:11010';
 
-		o = s.option(form.Flag, 'fw_allow_input', _('Allow input traffic'),
-			_('Allow input traffic to the EasyTier daemon.'));
+		o = s.option(form.Value, 'hostname', _('Hostname'),
+			_('Hostname used to identify this device.'));
+		o.depends('console', '0');
 
-		o = s.option(form.Button, '_panel', _('EasyTier Central'),
-			_('Create or manage your EasyTier network, and auth clients who could access.'));
-		o.inputtitle = _('Open website');
-		o.inputstyle = 'apply';
-		o.onclick = function() {
-			window.open("https://my.easytier.com/network", '_blank');
-		}
-
-		s = m.section(form.GridSection, 'network', _('Network configuration'));
-		s.addremove = true;
-		s.rowcolors = true;
-		s.sortable = true;
-		s.nodescriptions = true;
-
-		o = s.option(form.Flag, 'enabled', _('Enable'));
-		o.default = o.enabled;
-		o.editable = true;
-
-		o = s.option(form.Value, 'id', _('Network ID'));
-		o.rmempty = false;
-		o.width = '20%';
-
-		o = s.option(form.Flag, 'allow_managed', _('Allow managed IP/route'),
-			_('Allow EasyTier to set IP addresses and routes (local/private ranges only).'));
-		o.default = o.enabled;
-		o.editable = true;
-
-		o = s.option(form.Flag, 'allow_global', _('Allow global IP/route'),
-			_('Allow EasyTier to set global/public/not-private range IPs and routes.'));
-		o.editable = true;
-
-		o = s.option(form.Flag, 'allow_default', _('Allow default route'),
-			_('Allow EasyTier to set the default route on the system.'));
-		o.editable = true;
-
-		o = s.option(form.Flag, 'allow_dns', _('Allow DNS'),
-			_('Allow EasyTier to set DNS servers.'));
-		o.editable = true;
-
-		o = s.option(form.Flag, 'fw_allow_input', _('Allow input'),
-			_('Allow input traffic from the EasyTier network.'));
-		o.editable = true;
-
-		o = s.option(form.Flag, 'fw_allow_forward', _('Allow forward'),
-			_('Allow forward traffic from/to the EasyTier network.'));
-		o.editable = true;
-
-		o = s.option(widgets.DeviceSelect, 'fw_forward_ifaces', _('Forward interfaces'),
-			_('Leave empty for all.'));
-		o.multiple = true;
-		o.noaliases = true;
-		o.depends('fw_allow_forward', '1');
-		o.modalonly = true;
-
-		o = s.option(form.Flag, 'fw_allow_masq', _('Masquerading'),
-			_('Enable network address and port translation (NAT) for outbound traffic for this network.'));
-		o.editable = true;
-
-		o = s.option(widgets.DeviceSelect, 'fw_masq_ifaces', _('Masquerade interfaces'),
-			_('Leave empty for all.'));
-		o.multiple = true;
-		o.noaliases = true;
-		o.depends('fw_allow_masq', '1');
-		o.modalonly = true;
+		o = s.option(form.Value, 'device', _('TUN device name'),
+			_('Optional TUN interface name.'));
+		o.depends('console', '0');
+		o.placeholder = 'easytier';
 
 		return m.render();
 	}

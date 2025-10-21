@@ -5,6 +5,10 @@ START=90
 USE_PROCD=1
 PROG="/usr/bin/easytier-core"
 
+append_param() {
+    procd_append_param command "$2" "$1"
+}
+
 start_service() {
 	config_load easytier
 	local enabled console machine
@@ -38,6 +42,45 @@ start_service() {
 		if [ -n "${machine}" ]; then
 			procd_append_param command --machine-id "$machine"
 		fi
+	else
+		local dhcp network secret ipv4 device hostname
+		ipv4=""
+
+		config_get network 'global' 'network'
+		if [ -z "${network}" ]; then
+			logger -t easytier "Error: 'network' must be set in /etc/config/easytier when 'console' is disabled."
+			return 1
+		fi
+		procd_append_param command --network-name "$network"
+
+		config_get secret 'global' 'secret'
+		if [ -n "${secret}" ]; then
+			procd_append_param command --network-secret "$secret"
+		fi
+
+		config_get_bool dhcp 'global' 'dhcp' 1
+		if [ "${dhcp}" = "1" ]; then
+			config_get ipv4 'global' 'ipv4'
+		fi
+		if [ -z "${ipv4}" ]; then
+			procd_append_param command -d
+		else
+			procd_append_param command -i "$ipv4"
+		fi
+
+		config_get hostname 'global' 'hostname'
+		if [ -n "${hostname}" ]; then
+			procd_append_param command --hostname "$hostname"
+		fi
+
+		config_get device 'global' 'device' 'easytier'
+		if [ -n "${device}" ]; then
+			procd_append_param command --dev-name "$device"
+		fi
+
+		config_list_foreach global peers append_param -p
+
+		procd_append_param command --proxy-forward-by-system
 	fi
 
 	procd_set_param stderr 1

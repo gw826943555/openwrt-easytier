@@ -17,7 +17,7 @@ return view.extend({
 				return '';
 			}
 
-			var interfaces = res.stdout.match(/zt[a-z0-9]+/g);
+			var interfaces = res.stdout.match(/\beasytier[0-9A-Za-z_-]*\b/g);
 			if (!interfaces || interfaces.length === 0)
 				return 'No interface online.';
 
